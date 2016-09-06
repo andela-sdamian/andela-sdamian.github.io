@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="Quizard is an easy to use q&a manager for teachers, examiners and employers. It's completely free to use">
+    <meta name="author" content="Damian Simon Peter">
+
+    <title>Quizard - it's cool!</title>
+
+    <link href="lib/css/style.default.css" rel="stylesheet">
+    <link href="lib/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body class="signin">
+
+
+<section>
+
+    <div class="panel panel-signin">
+
+        <div class="panel-body">
+            <div class="logo text-center">
+
+                <h1>Quizard</h1>
+            </div>
+            <br />
+            <h4 class="text-center mb5">Already a Member?</h4>
+            <p class="text-center">Log in to your account</p>
+
+            <div class="mb30"></div>
+
+            <form name="frmLogin">
+                <div class="input-group mb15">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+                    <input type="email" class="form-control" placeholder="Email" id="email" name="email">
+
+
+                </div><!-- input-group -->
+                <div class="input-group mb15">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                    <input type="password" class="form-control" placeholder="Password" id="password" name="password">
+                </div><!-- input-group -->
+
+                <div class="clearfix">
+                    <div class="pull-left">
+                        <div class="ckbox ckbox-primary mt10">
+                            <input type="checkbox" id="rememberMe" value="1">
+                            <label for="rememberMe">Remember Me</label>
+                        </div>
+                    </div>
+                    <div class="pull-right">
+
+                        <input type="submit" class="btn btn-success" id="btnLogin" value="Login"/>
+                    </div>
+                </div>
+            </form>
+
+        </div><!-- panel-body -->
+        <div class="panel-footer">
+            <a href="template/register.html" class="btn btn-primary btn-block">Not yet a Member? Create Account Now</a>
+                <br />
+            <a href="//github.com/damiansimonpeter/quizard-js-version" target="_blank" class="pull-left">API DOCs</a>
+            <a href="//twitter.com/damiansimonpete" target="_blank" class="pull-right">Copyright &copy; Damian Simon Peter</a>
+        </div><!-- panel-footer -->
+    </div><!-- panel -->
+
+</section>
+
+
+<script src="js/user-manager.js"></script>
+<script src="template/js/login.js"></script>
+
+</body>
+</html>

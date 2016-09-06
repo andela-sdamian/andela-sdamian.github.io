@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="Quiz Manager, Exam, Mock Test and More">
+    <meta name="author" content="Damian Simon Peter">
+
+    <title>Quizard - it's cool!</title>
+
+    <link href="../lib/css/style.default.css" rel="stylesheet">
+    <link href="../lib/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../lib/css/jquery-ui-1.10.3.css" rel="stylesheet">
+    <link href="../lib/css/animate.delay.css" rel="stylesheet">
+    <link href="../lib/css/animate.min.css" rel="stylesheet">
+    <link href="../lib/css/toggles.css" rel="stylesheet">
+    <link href="../lib/css/pace.css" rel="stylesheet">
+
+</head>
+
+<body class="signin">
+
+<div class="logo text-center" style="color:#ffffff;">
+
+    <h1>Quizard</h1>
+</div>
+
+<section>
+
+    <div class="panel panel-signup">
+        <div class="panel-body">
+
+            <h4 class="" id="question">Welcome, <i>John Doe</i> </h4 >
+
+            <div class="mb30"></div>
+
+
+
+            <form name="frmUserData">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="input-group mb15">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input type="text" class="form-control"  id="firstname" name="firstname" disabled>
+                        </div><!-- input-group -->
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group mb15">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input type="text" class="form-control"  id="lastname" name="lastname" disabled>
+                        </div><!-- input-group -->
+                    </div>
+                </div><!-- row -->
+
+
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="input-group mb15">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+                            <input type="email" class="form-control"  id="email" name="email" disabled>
+                        </div><!-- input-group -->
+                    </div>
+
+                </div>
+            </form>
+
+        </div><!-- panel-body -->
+        <div class="panel-footer" >
+
+            <div class="clearfix" >
+                <div class="pull-left">
+
+                    <input type="button" class="btn btn-warning" value="Change Password" id="btnChangePwd"/> <br /> <br />
+
+                    <input type="button" class="btn btn-info" value="Update Data" id="btnUpdateData"/><br /><br />
+
+                    <input type="button" class="btn btn-dark" value="Take Quiz" id="btnQuiz"/>
+                </div>
+
+                <div class="pull-right">
+
+
+                    <input type="button" class="btn btn-danger" value="Logout" id="btnLogout"/>
+
+                </div>
+
+            </div>
+
+        </div><!-- panel-footer -->
+    </div><!-- panel -->
+
+</section>
+
+<script src="../js/dom-core.js"></script>
+<script src="../js/user-manager.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

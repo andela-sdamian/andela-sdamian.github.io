@@ -1,0 +1,392 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/**
+<span class='line'>  2</span>  * @fileOverview
+<span class='line'>  3</span>  * user-manager.js is a js module that features all the APIs
+<span class='line'>  4</span>  * used to manage a user using local storage as a backend.It's features are
+<span class='line'>  5</span>  * registering new user
+<span class='line'>  6</span>  * logging user in
+<span class='line'>  7</span>  * handling state synonymous with session variable in PHP
+<span class='line'>  8</span>  * changing password
+<span class='line'>  9</span>  * state navigation
+<span class='line'> 10</span>  * fetching data
+<span class='line'> 11</span>  * inserting data
+<span class='line'> 12</span>  * updating data and lots more..
+<span class='line'> 13</span>  * Created by Damian Simon Peter on 9/26/2015.
+<span class='line'> 14</span>  * @author Damian Simon Peter
+<span class='line'> 15</span>  *@see &lt;a href="http://github.com/damiansimonpeter/quizard-js-version">Code on Github&lt;/a>
+<span class='line'> 16</span>  * @requires localStorage
+<span class='line'> 17</span>  * @version 0.2.4
+<span class='line'> 18</span>  *
+<span class='line'> 19</span>  */</span><span class="WHIT">
+<span class='line'> 20</span> 
+<span class='line'> 21</span> </span><span class="COMM">/**
+<span class='line'> 22</span>  * Represent the default view or landing page
+<span class='line'> 23</span>  * @constant
+<span class='line'> 24</span>  * */</span><span class="WHIT">
+<span class='line'> 25</span> </span><span class="KEYW">const</span><span class="WHIT"> </span><span class="NAME">BASE_STATE</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT">  </span><span class="STRN">'../index.html'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 26</span> 
+<span class='line'> 27</span> </span><span class="COMM">/**
+<span class='line'> 28</span>  * Represent the secured page secured by authentication
+<span class='line'> 29</span>  * @constant
+<span class='line'> 30</span>  * */</span><span class="WHIT">
+<span class='line'> 31</span> </span><span class="KEYW">const</span><span class="WHIT"> </span><span class="NAME">DASHBOARD</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'dashboard.html'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 32</span> 
+<span class='line'> 33</span> 
+<span class='line'> 34</span> 
+<span class='line'> 35</span> </span><span class="COMM">/**
+<span class='line'> 36</span>  * Handles state transition i.e. navigating user from one state to another
+<span class='line'> 37</span>  * @param {string} state The location you wish to take the user to
+<span class='line'> 38</span>  * @returns {undefined} returns undefined
+<span class='line'> 39</span>  * @example
+<span class='line'> 40</span>  * stateGo('dashboard.html'); //takes the user to the page dashboard.html
+<span class='line'> 41</span>  * */</span><span class="WHIT">
+<span class='line'> 42</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">stateGo</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 43</span> 
+<span class='line'> 44</span> </span><span class="WHIT">    </span><span class="NAME">window.location.assign</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 45</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 46</span> 
+<span class='line'> 47</span> 
+<span class='line'> 48</span> </span><span class="COMM">/**
+<span class='line'> 49</span>  * Inserts data to local storage.
+<span class='line'> 50</span>  * @param {string} key The unique identifier for your object for ease of retrieval
+<span class='line'> 51</span>  * @param {object} data The object you want to save. Must be a javascript object and not a JSON string.
+<span class='line'> 52</span>  * @returns {boolean} returns true
+<span class='line'> 53</span>  * @example
+<span class='line'> 54</span>  *
+<span class='line'> 55</span>  * var obj = {firstname:"John", lastname:"Doe", email:"johndoe@email.com"}
+<span class='line'> 56</span>  * inserData("johndoe@email.com", obj); //saves obj in local storage as JSON string and returns true
+<span class='line'> 57</span>  *
+<span class='line'> 58</span>  * */</span><span class="WHIT">
+<span class='line'> 59</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">insertData</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">data</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 60</span> 
+<span class='line'> 61</span> </span><span class="WHIT">    </span><span class="NAME">localStorage.setItem</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">JSON.stringify</span><span class="PUNC">(</span><span class="NAME">data</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 62</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 63</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 64</span> 
+<span class='line'> 65</span> </span><span class="COMM">/**
+<span class='line'> 66</span>  * Gets data from local storage
+<span class='line'> 67</span>  * @param {string} key The unique identifier for your object for ease of retrieval. Usually a string
+<span class='line'> 68</span>  * @returns {object} return javascript object
+<span class='line'> 69</span>  * @example
+<span class='line'> 70</span>  *
+<span class='line'> 71</span>  * Using the previous illustration we can use
+<span class='line'> 72</span>  * getData("johndoe@email.com") // {firstname:"John", lastname:"Doe", email:"johndoe@email.com"}
+<span class='line'> 73</span>  *
+<span class='line'> 74</span>  * There is a better way to fetch logged in user data using the getCurrentUser() API.
+<span class='line'> 75</span>  * The above illustration can be simplified to
+<span class='line'> 76</span>  * getData(getCurrentUser())
+<span class='line'> 77</span>  * @see getCurrentUser()
+<span class='line'> 78</span>  *
+<span class='line'> 79</span>  * */</span><span class="WHIT">
+<span class='line'> 80</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getData</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 81</span> 
+<span class='line'> 82</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">JSON.parse</span><span class="PUNC">(</span><span class="NAME">localStorage.getItem</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 83</span> 
+<span class='line'> 84</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 85</span> 
+<span class='line'> 86</span> </span><span class="COMM">/**
+<span class='line'> 87</span>  * Handles registration of new user
+<span class='line'> 88</span>  * @param {object} userData The object containing the user fields
+<span class='line'> 89</span>  * @field {string} userData.firstname The user First Name
+<span class='line'> 90</span>  * @field {string} userData.lastname The user Last Name
+<span class='line'> 91</span>  * @field {string} userData.email The user Email Address
+<span class='line'> 92</span>  * @field {string} userData.password The user Password
+<span class='line'> 93</span>  * @field {string} userData.password2 The user Password
+<span class='line'> 94</span>  * @param {boolean} terms A boolean true if user agrees to terms and conditions false otherwise
+<span class='line'> 95</span>  * @param {string} [state = 'dashboard.html'] An optional argument specifying the page you wish to take the user to after registration. Defaults to 'dashboard.html'
+<span class='line'> 96</span>  * @returns {object} returns an object containing the response message
+<span class='line'> 97</span>  * */</span><span class="WHIT">
+<span class='line'> 98</span> 
+<span class='line'> 99</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">registerNewUser</span><span class="PUNC">(</span><span class="NAME">userData</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">terms</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>100</span> 
+<span class='line'>101</span> </span><span class="WHIT">    </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">'dashboard.html'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>102</span> 
+<span class='line'>103</span> </span><span class="WHIT">        </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">d</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">userData</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>104</span> 
+<span class='line'>105</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isEmpty</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NAME">d.firstname</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">d.lastname</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">d.email</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">d.password</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">d.password2</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>106</span> 
+<span class='line'>107</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">20</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Please complete all fields"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>108</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>109</span> 
+<span class='line'>110</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">fname</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">nameValid</span><span class="PUNC">(</span><span class="NAME">d.firstname</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>111</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">fname.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">67</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>112</span> 
+<span class='line'>113</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">fname</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>114</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">fname.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">69</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>115</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">fname</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>116</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>117</span> 
+<span class='line'>118</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">lname</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">nameValid</span><span class="PUNC">(</span><span class="NAME">d.lastname</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>119</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">lname.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">67</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>120</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">lname</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>121</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">lname.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">69</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>122</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">lname</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>123</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>124</span> 
+<span class='line'>125</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">emailCheck</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">userExist</span><span class="PUNC">(</span><span class="NAME">userData.email</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>126</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">emailCheck.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">59</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>127</span> 
+<span class='line'>128</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">emailCheck</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>129</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>130</span> 
+<span class='line'>131</span> </span><span class="WHIT">        </span><span class="NAME">emailCheck</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">emailValid</span><span class="PUNC">(</span><span class="NAME">userData.email</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>132</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">emailCheck.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">65</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>133</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">emailCheck</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>134</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>135</span> 
+<span class='line'>136</span> 
+<span class='line'>137</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">d.password</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="NAME">d.password2</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>138</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">21</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Password do not match"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>139</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>140</span> 
+<span class='line'>141</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">pwdCheck</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">passwordValid</span><span class="PUNC">(</span><span class="NAME">d.password</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>142</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">pwdCheck.code</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">79</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>143</span> 
+<span class='line'>144</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">pwdCheck</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>145</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>146</span> 
+<span class='line'>147</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">terms</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>148</span> 
+<span class='line'>149</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">22</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"We mandate that you read and accepts our terms and conditions."</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>150</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>151</span> </span><span class="WHIT">    </span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">userData.password2</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>152</span> </span><span class="WHIT">    </span><span class="NAME">insertData</span><span class="PUNC">(</span><span class="NAME">userData.email</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">userData</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>153</span> </span><span class="WHIT">    </span><span class="NAME">insertData</span><span class="PUNC">(</span><span class="STRN">"current-user"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">userData.email</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>154</span> </span><span class="WHIT">    </span><span class="NAME">toSimonPeterDB</span><span class="PUNC">(</span><span class="NAME">JSON.stringify</span><span class="PUNC">(</span><span class="NAME">userData</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">DB_URL</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>155</span> </span><span class="WHIT">    </span><span class="NAME">stateGo</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>156</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">23</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Registration successful"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>157</span> 
+<span class='line'>158</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>159</span> 
+<span class='line'>160</span> </span><span class="COMM">/**
+<span class='line'>161</span>  * Gets the current logged in user
+<span class='line'>162</span>  * @returns {string} returns a string containing the currently logged in user key
+<span class='line'>163</span>  * */</span><span class="WHIT">
+<span class='line'>164</span> 
+<span class='line'>165</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getCurrentUser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>166</span> 
+<span class='line'>167</span> </span><span class="WHIT">   </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">getData</span><span class="PUNC">(</span><span class="STRN">"current-user"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>168</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>169</span> 
+<span class='line'>170</span> 
+<span class='line'>171</span> </span><span class="COMM">/**
+<span class='line'>172</span>  *  Secures pages meant for authenticated users
+<span class='line'>173</span>  *  @param {string} [state = BASE_STATE] Optional state parameter i.e. where to redirect unauthenticated user
+<span class='line'>174</span>  *  @returns {undefined}
+<span class='line'>175</span>  * */</span><span class="WHIT">
+<span class='line'>176</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">handleState</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>177</span> </span><span class="WHIT">    </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">BASE_STATE</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>178</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">getCurrentUser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>179</span> </span><span class="WHIT">        </span><span class="NAME">stateGo</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>180</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>181</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>182</span> 
+<span class='line'>183</span> </span><span class="COMM">/**
+<span class='line'>184</span>  * Fetches the user data from the database
+<span class='line'>185</span>  * based on the provided parameters
+<span class='line'>186</span>  * @param {string} email The user email address
+<span class='line'>187</span>  * @param {string} password The user password
+<span class='line'>188</span>  * @param {string} [state = 'template/DASHBOARD']An optional argument specifying the page you wish to take the user to after successful authentication. Defaults to 'dashboard.html'
+<span class='line'>189</span>  *
+<span class='line'>190</span>  *@returns {object} returns an object containing the response message
+<span class='line'>191</span>  * */</span><span class="WHIT">
+<span class='line'>192</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">loginUser</span><span class="PUNC">(</span><span class="NAME">email</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">password</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>193</span> 
+<span class='line'>194</span> </span><span class="WHIT">    </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">'template/'</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">DASHBOARD</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>195</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isEmpty</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NAME">email</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">password</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>196</span> 
+<span class='line'>197</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">10</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Please complete all fields!"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>198</span> 
+<span class='line'>199</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>200</span> 
+<span class='line'>201</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">getData</span><span class="PUNC">(</span><span class="NAME">email</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>202</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">11</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Invalid username/password"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>203</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>204</span> 
+<span class='line'>205</span> </span><span class="WHIT">        </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">d</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">getData</span><span class="PUNC">(</span><span class="NAME">email</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>206</span> 
+<span class='line'>207</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">d.email</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">email</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">d.password</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">password</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>208</span> </span><span class="WHIT">            </span><span class="NAME">insertData</span><span class="PUNC">(</span><span class="STRN">"current-user"</span><span class="PUNC">,</span><span class="NAME">email</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>209</span> </span><span class="WHIT">            </span><span class="NAME">stateGo</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>210</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>211</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">11</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Invalid username/password"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>212</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>213</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>214</span> 
+<span class='line'>215</span> 
+<span class='line'>216</span> </span><span class="COMM">/**
+<span class='line'>217</span>  * Changes the user password
+<span class='line'>218</span>  * @param {string} old_pwd The user previous password
+<span class='line'>219</span>  * @param {string} new_pwd The user new password
+<span class='line'>220</span>  * @param {string} confirm_pwd The user new password
+<span class='line'>221</span>  * @returns {object} Returns a response with failed response
+<span class='line'>222</span>  * */</span><span class="WHIT">
+<span class='line'>223</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">changePassword</span><span class="PUNC">(</span><span class="NAME">old_pwd</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">new_pwd</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">confirm_pwd</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>224</span> 
+<span class='line'>225</span> 
+<span class='line'>226</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">userData</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">getData</span><span class="PUNC">(</span><span class="NAME">getCurrentUser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>227</span> 
+<span class='line'>228</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">new_pwd</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="NAME">confirm_pwd</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>229</span> 
+<span class='line'>230</span> 
+<span class='line'>231</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">48</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"New password do not match"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>232</span> 
+<span class='line'>233</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>234</span> 
+<span class='line'>235</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">userData.password</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">old_pwd</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>236</span> </span><span class="WHIT">        </span><span class="NAME">userData.password</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">new_pwd</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>237</span> 
+<span class='line'>238</span> </span><span class="WHIT">        </span><span class="NAME">insertData</span><span class="PUNC">(</span><span class="NAME">getCurrentUser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">userData</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>239</span> </span><span class="WHIT">        </span><span class="NAME">logoutUser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>240</span> </span><span class="WHIT">        </span><span class="NAME">stateGo</span><span class="PUNC">(</span><span class="NAME">BASE_STATE</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>241</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">50</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Password changed successfully \n You will be logged out now!"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>242</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>243</span> 
+<span class='line'>244</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">49</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Current password failed to match"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>245</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>246</span> 
+<span class='line'>247</span> 
+<span class='line'>248</span> </span><span class="COMM">/**
+<span class='line'>249</span>  * Log's out the user from a secure page
+<span class='line'>250</span>  * @param {string} [state = BASE_STATE] The page you redirect logged out user to
+<span class='line'>251</span>  * */</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">logoutUser</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>253</span> 
+<span class='line'>254</span> </span><span class="WHIT">    </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">state</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">BASE_STATE</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>255</span> </span><span class="WHIT">    </span><span class="NAME">localStorage.removeItem</span><span class="PUNC">(</span><span class="STRN">"current-user"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>256</span> 
+<span class='line'>257</span> </span><span class="WHIT">    </span><span class="NAME">stateGo</span><span class="PUNC">(</span><span class="NAME">state</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>258</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>259</span> 
+<span class='line'>260</span> 
+<span class='line'>261</span> </span><span class="COMM">/**
+<span class='line'>262</span>  * Validate fields to ensure they are not empty
+<span class='line'>263</span>  * @param {object} arr An array containing the fields you want to validate
+<span class='line'>264</span>  * @returns {boolean} return true if empty false otherwise
+<span class='line'>265</span>  * */</span><span class="WHIT">
+<span class='line'>266</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">isEmpty</span><span class="PUNC">(</span><span class="NAME">arr</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>267</span> 
+<span class='line'>268</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">arr.some</span><span class="PUNC">(</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">value</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>269</span> 
+<span class='line'>270</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">value</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">""</span><span class="WHIT"> </span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>271</span> 
+<span class='line'>272</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>273</span> 
+<span class='line'>274</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>275</span> 
+<span class='line'>276</span> 
+<span class='line'>277</span> </span><span class="COMM">/**
+<span class='line'>278</span>  * Get all users from the local storage
+<span class='line'>279</span>  * @returns {object} returns an array of object
+<span class='line'>280</span>  * */</span><span class="WHIT">
+<span class='line'>281</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getAllUsers</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>282</span> 
+<span class='line'>283</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">result</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">obj</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="WHIT">    </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">localStorage</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>285</span> 
+<span class='line'>286</span> </span><span class="WHIT">        </span><span class="NAME">obj</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">localStorage</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>287</span> 
+<span class='line'>288</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">obj.indexOf</span><span class="PUNC">(</span><span class="STRN">"firstname"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>289</span> 
+<span class='line'>290</span> </span><span class="WHIT">            </span><span class="NAME">result.push</span><span class="PUNC">(</span><span class="NAME">JSON.parse</span><span class="PUNC">(</span><span class="NAME">obj</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>291</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>292</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>293</span> 
+<span class='line'>294</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">result</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>295</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>296</span> 
+<span class='line'>297</span> </span><span class="COMM">/**
+<span class='line'>298</span>  * Checks to see if a user exist
+<span class='line'>299</span>  * @param {string} email "The user email address"
+<span class='line'>300</span>  * @returns {object} returns an object containing the response message
+<span class='line'>301</span>  * */</span><span class="WHIT">
+<span class='line'>302</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">userExist</span><span class="PUNC">(</span><span class="NAME">email</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>303</span> 
+<span class='line'>304</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">data</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">getAllUsers</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>305</span> </span><span class="WHIT">        </span><span class="NAME">len</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">data.length</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>306</span> </span><span class="WHIT">        </span><span class="NAME">obj</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>307</span> </span><span class="WHIT">    </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">len</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>308</span> 
+<span class='line'>309</span> </span><span class="WHIT">        </span><span class="NAME">obj</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">data</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>310</span> 
+<span class='line'>311</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">obj.email</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">email</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>312</span> 
+<span class='line'>313</span> </span><span class="WHIT">            </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">59</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"A user exist with this email"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>314</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>315</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>316</span> 
+<span class='line'>317</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">60</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Email is available"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>318</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>319</span> 
+<span class='line'>320</span> 
+<span class='line'>321</span> </span><span class="COMM">/**
+<span class='line'>322</span>  * Checks the validity of an email address
+<span class='line'>323</span>  * @param {string} email The user email address
+<span class='line'>324</span>  * @returns {object} returns an object containing the response message
+<span class='line'>325</span>  * */</span><span class="WHIT">
+<span class='line'>326</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">emailValid</span><span class="PUNC">(</span><span class="NAME">email</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>327</span> 
+<span class='line'>328</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">pattern</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="REGX">/^[\w\.\-]+@([\w\-]+\.)+[a-zA-Z]+$/</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>329</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">pattern.test</span><span class="PUNC">(</span><span class="NAME">email</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>330</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">66</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Email is valid"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">65</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Invalid email format"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>333</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>334</span> 
+<span class='line'>335</span> </span><span class="COMM">/**
+<span class='line'>336</span>  * Checks the validity of a name field. Characters allowed are [a-z] case  insensitive plus white space
+<span class='line'>337</span>  * @param {string} name The name you wish to validate
+<span class='line'>338</span>  * @returns {object} returns an object containing the response message
+<span class='line'>339</span>  *
+<span class='line'>340</span>  * */</span><span class="WHIT">
+<span class='line'>341</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">nameValid</span><span class="PUNC">(</span><span class="NAME">name</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>342</span> 
+<span class='line'>343</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">name.length</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>344</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">67</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Name too short"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>345</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>346</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">nameRegEx</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="REGX">/[^a-z\s]/i</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>347</span> 
+<span class='line'>348</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">result</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">nameRegEx.test</span><span class="PUNC">(</span><span class="NAME">name</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>349</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">result</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>350</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">68</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Name is valid"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>351</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>352</span> 
+<span class='line'>353</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">69</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Invalid name format"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>354</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>355</span> 
+<span class='line'>356</span> </span><span class="COMM">/**
+<span class='line'>357</span>  * Checks the validity of a password string. characters allowed are alphanumeric, at least one capital letter, one special character
+<span class='line'>358</span>  * @param {string} password The password you wish to validate
+<span class='line'>359</span>  * @returns {object} returns an object containing the response message
+<span class='line'>360</span>  * */</span><span class="WHIT">
+<span class='line'>361</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">passwordValid</span><span class="PUNC">(</span><span class="NAME">password</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>362</span> 
+<span class='line'>363</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">password.length</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NUMB">5</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>364</span> </span><span class="WHIT">        </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">79</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Password length must be 5 or greater"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>365</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>366</span> 
+<span class='line'>367</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NUMB">80</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"Password is valid"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>368</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>369</span> 
+<span class='line'>370</span> 
+<span class='line'>371</span> 
+<span class='line'>372</span> 
+<span class='line'>373</span> </span><span class="COMM">/**
+<span class='line'>374</span>  * This is used to return an error/success message to the user
+<span class='line'>375</span>  * @param {number} errCode The unique custom error code
+<span class='line'>376</span>  * @param {string} msg The custom message associated with the error code
+<span class='line'>377</span>  * @returns {object} returns an object
+<span class='line'>378</span>  * */</span><span class="WHIT">
+<span class='line'>379</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">response</span><span class="PUNC">(</span><span class="NAME">errCode</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">msg</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>380</span> 
+<span class='line'>381</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>382</span> </span><span class="WHIT">        </span><span class="NAME">code</span><span class="PUNC">:</span><span class="NAME">errCode</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>383</span> </span><span class="WHIT">        </span><span class="NAME">message</span><span class="PUNC">:</span><span class="NAME">msg</span><span class="WHIT">
+<span class='line'>384</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>385</span> </span><span class="PUNC">}</span></pre></body></html>
